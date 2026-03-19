@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#FF6B35">
+  <link rel="manifest" href="manifest.json">
+  <title>Puzzle Fun! 🧩</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #FFF9F0;
+      --primary:   #FF6B35;
+      --secondary: #4ECDC4;
+      --accent:    #FFE66D;
+      --dark:      #2D3142;
+      --tray-bg:   #FFF0E6;
+      --radius:    18px;
+      --header-h:  52px;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: 'Nunito', sans-serif;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ============================================================
+       SCREENS
+    ============================================================ */
+    .screen {
+      position: absolute; inset: 0;
+      display: none;
+    }
+    .screen.active { display: flex; }
+
+    /* ============================================================
+       ORIENTATION OVERLAY
+    ============================================================ */
+    #orient-overlay {
+      position: fixed; inset: 0; z-index: 99999;
+      background: var(--bg);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      display: none;
+    }
+    #orient-overlay.show { display: flex; }
+    #orient-overlay .icon { font-size: 72px; animation: spin 2s linear infinite; }
+    @keyframes spin {
+      0%   { transform: rotate(0deg); }
+      25%  { transform: rotate(-90deg); }
+      50%  { transform: rotate(-90deg); }
+      100% { transform: rotate(-90deg); }
+    }
+    #orient-overlay p {
+      font-size: 20px; font-weight: 800; color: var(--dark); text-align: center;
+    }
+
+    /* ============================================================
+       MENU SCREEN
+    ============================================================ */
+    #menu-screen {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 16px 24px;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255,107,53,.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(78,205,196,.12) 0%, transparent 60%),
+        var(--bg);
+    }
+
+    .menu-title {
+      font-size: clamp(26px, 5vw, 56px);
+      font-weight: 900;
+      color: var(--dark);
+      letter-spacing: -1px;
+      text-align: center;
+    }
+    .menu-title .grad {
+      background: linear-gradient(135deg, var(--primary) 0%, #FF8C42 50%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    #puzzle-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      max-width: 760px;
+    }
+
+    .puzzle-card {
+      width: clamp(110px, 18vw, 170px);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,.1);
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+      border: 3px solid transparent;
+    }
+    .puzzle-card:hover  { transform: translateY(-5px) scale(1.04); box-shadow: 0 12px 32px rgba(0,0,0,.18); }
+    .puzzle-card:active { transform: scale(.97); }
+
+    .puzzle-card img {
+      width: 100%; aspect-ratio: 1/1;
+      object-fit: cover; display: block;
+    }
+    .puzzle-card-name {
+      padding: 6px 10px 10px;
+      font-size: 13px; font-weight: 800;
+      color: var(--dark); text-align: center;
+    }
+
+    /* ============================================================
+       GAME SCREEN
+    ============================================================ */
+    #game-screen {
+      flex-direction: column;
+      background:
+        radial-gradient(ellipse at 0% 100%, rgba(255,107,53,.08) 0%, transparent 50%),
+        var(--bg);
+    }
+
+    /* --- Header --- */
+    #game-header {
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 12px;
+      flex-shrink: 0;
+      border-bottom: 2px solid rgba(0,0,0,.05);
+    }
+
+    #back-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--primary);
+      color: white; border: none; border-radius: 12px;
+      padding: 6px 14px;
+      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(255,107,53,.4);
+      transition: transform .15s, box-shadow .15s;
+      flex-shrink: 0;
+    }
+    #back-btn:active { transform: scale(.93); box-shadow: none; }
+
+    #puzzle-title-header {
+      font-size: clamp(14px, 2.5vw, 20px);
+      font-weight: 900; color: var(--dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    #progress-wrap {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0;
+    }
+    #progress-label {
+      font-size: 13px; font-weight: 800; color: var(--secondary);
+      white-space: nowrap;
+    }
+    #progress-bar-track {
+      width: 80px; height: 10px;
+      background: rgba(78,205,196,.2);
+      border-radius: 10px; overflow: hidden;
+    }
+    #progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--secondary), #26A69A);
+      border-radius: 10px;
+      width: 0%;
+      transition: width .4s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    /* --- Game Area --- */
+    #game-area {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* --- Pieces Tray --- */
+    #pieces-area {
+      width: 33%;
+      min-width: 90px;
+      max-width: 200px;
+      height: 100%;
+      background: var(--tray-bg);
+      position: relative;
+      border-right: 2px dashed rgba(255,107,53,.22);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    #pieces-area::before {
+      content: 'Кусочки';
+      position: absolute; bottom: 8px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px; font-weight: 800;
+      color: rgba(45,49,66,.25);
+      pointer-events: none; white-space: nowrap;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    /* --- Board Area --- */
+    #board-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      position: relative;
+    }
+
+    #puzzle-board {
+      position: relative;
+      border-radius: 14px;
+      box-shadow:
+        0 0 0 3px rgba(78,205,196,.35),
+        0 10px 40px rgba(0,0,0,.15);
+      background: #E8F8F5;
+      overflow: visible;
+      flex-shrink: 0;
+    }
+
+    /* Slot ghost outlines */
+    .board-slot {
+      position: absolute;
+      border: 2px dashed rgba(78,205,196,.45);
+      background: rgba(78,205,196,.07);
+      border-radius: 6px;
+      pointer-events: none;
+      transition: background .3s, border-color .3s;
+    }
+    .board-slot.filled {
+      background: transparent;
+      border-color: transparent;
+    }
+
+    /* Ghost image overlay */
+    #ghost-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; border-radius: 12px;
+      opacity: .1; pointer-events: none;
+      user-select: none;
+    }
+
+    /* ============================================================
+       PUZZLE PIECES
+    ============================================================ */
+    .puzzle-piece {
+      position: absolute;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      will-change: transform, left, top;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,.22));
+      transition: filter .2s;
+    }
+    .puzzle-piece canvas { display: block; }
+
+    .puzzle-piece.dragging {
+      cursor: grabbing;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.38));
+      z-index: 1000 !important;
+    }
+    .puzzle-piece.placed {
+      cursor: default;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,.12));
+    }
+    .puzzle-piece.snapping {
+      transition:
+        left .22s cubic-bezier(.34,1.56,.64,1),
+        top  .22s cubic-bezier(.34,1.56,.64,1),
+        transform .22s cubic-bezier(.34,1.56,.64,1),
+        filter .2s;
+    }
+
+    /* ============================================================
+       CONFETTI CANVAS
+    ============================================================ */
+    #confetti-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9999;
+    }
+
+    /* ============================================================
+       WIN OVERLAY
+    ============================================================ */
+    #win-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      display: none; align-items: center; justify-content: center;
+      z-index: 9998;
+    }
+    #win-overlay.show { display: flex; }
+
+    #win-card {
+      background: white;
+      border-radius: 28px;
+      padding: 36px 52px;
+      text-align: center;
+      box-shadow: 0 24px 80px rgba(0,0,0,.3);
+      animation: popIn .45s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn {
+      from { transform: scale(.4) rotate(-6deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    #win-card .win-emoji { font-size: 60px; display: block; margin-bottom: 6px; }
+    #win-card h2 {
+      font-size: clamp(24px, 5vw, 40px); font-weight: 900;
+      color: var(--dark); margin-bottom: 22px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .win-btns { display: flex; gap: 12px; justify-content: center; }
+    .win-btn {
+      border: none; border-radius: 14px;
+      padding: 11px 26px;
+      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+      color: white; cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 4px 14px rgba(0,0,0,.15);
+    }
+    .win-btn:active { transform: scale(.93); box-shadow: none; }
+    .win-btn.orange { background: linear-gradient(135deg, var(--primary), #FF8C42); }
+    .win-btn.teal   { background: linear-gradient(135deg, var(--secondary), #26A69A); }
+
+    /* ============================================================
+       STAR BURST
+    ============================================================ */
+    .star-burst {
+      position: fixed; pointer-events: none; font-size: 22px;
+      animation: starPop .55s ease-out forwards;
+      z-index: 9997; will-change: transform, opacity;
+    }
+    @keyframes starPop {
+      0%   { transform: scale(0) translateY(0); opacity: 1; }
+      60%  { transform: scale(1.4) translateY(-20px); opacity: 1; }
+      100% { transform: scale(0) translateY(-40px); opacity: 0; }
+    }
+
+    /* ============================================================
+       LOADING SPINNER
+    ============================================================ */
+    #loading-overlay {
+      position: absolute; inset: 0;
+      display: none; align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
+      background: rgba(255,249,240,.85);
+      z-index: 500; border-radius: 14px;
+    }
+    #loading-overlay.show { display: flex; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid rgba(255,107,53,.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: rotate .8s linear infinite;
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+    #loading-overlay p { font-size: 14px; font-weight: 700; color: var(--dark); }
+  </style>
+</head>
+<body>
+
+<!-- Orientation warning -->
+<div id="orient-overlay">
+  <div class="icon">📱</div>
+  <p>Поверни телефон горизонтально! 🔄</p>
+</div>
+
+<!-- ============================================================
+     MENU SCREEN
+============================================================ -->
+<div id="menu-screen" class="screen active">
+  <h1 class="menu-title">🧩 <span class="grad">Puzzle Fun!</span></h1>
+  <div id="puzzle-gallery"></div>
+</div>
+
+<!-- ============================================================
+     GAME SCREEN
+============================================================ -->
+<div id="game-screen" class="screen">
+  <div id="game-header">
+    <button id="back-btn">← Назад</button>
+    <span id="puzzle-title-header"></span>
+    <div id="progress-wrap">
+      <span id="progress-label">0 / 9</span>
+      <div id="progress-bar-track">
+        <div id="progress-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-area">
+    <div id="pieces-area"></div>
+    <div id="board-area">
+      <div id="puzzle-board">
+        <img id="ghost-img" crossorigin="anonymous" alt="">
+        <!-- .board-slot elements injected here -->
+        <!-- .puzzle-piece elements injected into #game-area -->
+      </div>
+      <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p>Загружаем картинку…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confetti canvas -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- Win overlay -->
+<div id="win-overlay">
+  <div id="win-card">
+    <span class="win-emoji">🎉</span>
+    <h2>Молодец!</h2>
+    <div class="win-btns">
+      <button class="win-btn orange" id="btn-again">Ещё раз!</button>
+      <button class="win-btn teal"   id="btn-menu">Меню</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+'use strict';
+
+/* ============================================================
+   PUZZLE DEFINITIONS
+============================================================ */
+const PUZZLES = [
+  { name: '🐶 Щенок',   url: 'https://picsum.photos/id/237/600/600', seed: 42  },
+  { name: '🐱 Котик',   url: 'https://picsum.photos/id/40/600/600',  seed: 73  },
+  { name: '🌸 Цветы',   url: 'https://picsum.photos/id/152/600/600', seed: 99  },
+  { name: '🌲 Лес',     url: 'https://picsum.photos/id/10/600/600',  seed: 15  },
+  { name: '🏔️ Горы',   url: 'https://picsum.photos/id/29/600/600',  seed: 57  },
+];
+
+const COLS   = 3;
+const ROWS   = 3;
+const TOTAL  = COLS * ROWS;
+const SNAP   = 34; // px snap radius
+
+/* ============================================================
+   SEEDED PRNG  (LCG)
+============================================================ */
+function makeRng(seed) {
+  let s = (seed >>> 0) || 1;
+  return () => {
+    s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+    return s / 0x100000000;
+  };
+}
+
+/* ============================================================
+   GENERATE TAB DIRECTIONS
+   tabs[row][col] = { top, right, bottom, left }
+   +1 = outward tab, -1 = inward blank, 0 = straight edge
+============================================================ */
+function generateTabs(seed) {
+  const rng  = makeRng(seed);
+  const tabs = Array.from({ length: ROWS }, () =>
+    Array.from({ length: COLS }, () => ({}))
+  );
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      tabs[r][c].top    = r === 0        ? 0 : -tabs[r - 1][c].bottom;
+      tabs[r][c].left   = c === 0        ? 0 : -tabs[r][c - 1].right;
+      tabs[r][c].right  = c === COLS - 1 ? 0 : (rng() > 0.5 ? 1 : -1);
+      tabs[r][c].bottom = r === ROWS - 1 ? 0 : (rng() > 0.5 ? 1 : -1);
+    }
+  }
+  return tabs;
+}
+
+/* ============================================================
+   BEZIER PATH HELPERS
+   hTab: horizontal side  (x1,y) → (x2,y),  tab bump by dy
+   vTab: vertical side    (x,y1) → (x,y2),  tab bump by dx
+============================================================ */
+function hTab(ctx, x1, x2, y, dy) {
+  if (!dy) { ctx.lineTo(x2, y); return; }
+  const w   = Math.abs(x2 - x1);
+  const dir = x2 > x1 ? 1 : -1;
+  const mx  = (x1 + x2) * 0.5;
+  ctx.lineTo(x1 + dir * w * 0.35, y);
+  ctx.bezierCurveTo(
+    x1 + dir * w * 0.35, y + dy * 0.5,
+    mx  - dir * w * 0.10, y + dy,
+    mx, y + dy
+  );
+  ctx.bezierCurveTo(
+    mx  + dir * w * 0.10, y + dy,
+    x1 + dir * w * 0.65, y + dy * 0.5,
+    x1 + dir * w * 0.65, y
+  );
+  ctx.lineTo(x2, y);
+}
+
+function vTab(ctx, x, y1, y2, dx) {
+  if (!dx) { ctx.lineTo(x, y2); return; }
+  const h   = Math.abs(y2 - y1);
+  const dir = y2 > y1 ? 1 : -1;
+  const my  = (y1 + y2) * 0.5;
+  ctx.lineTo(x, y1 + dir * h * 0.35);
+  ctx.bezierCurveTo(
+    x + dx * 0.5, y1 + dir * h * 0.35,
+    x + dx, my  - dir * h * 0.10,
+    x + dx, my
+  );
+  ctx.bezierCurveTo(
+    x + dx, my  + dir * h * 0.10,
+    x + dx * 0.5, y1 + dir * h * 0.65,
+    x, y1 + dir * h * 0.65
+  );
+  ctx.lineTo(x, y2);
+}
+
+/* Build the full closed path for one puzzle piece.
+   (px,py) = top-left of cell area within the piece canvas,
+   (cw,ch) = cell dimensions, t = tab protrusion */
+function buildPiecePath(ctx, px, py, cw, ch, tabs, t) {
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  // TOP    left→right  outward = UP   (negative y)
+  hTab(ctx, px,    px + cw, py,      tabs.top    ? -tabs.top    * t : 0);
+  // RIGHT  top→bottom  outward = RIGHT (positive x)
+  vTab(ctx, px+cw, py,    py + ch,   tabs.right  ?  tabs.right  * t : 0);
+  // BOTTOM right→left  outward = DOWN  (positive y)
+  hTab(ctx, px+cw, px,    py + ch,   tabs.bottom ?  tabs.bottom * t : 0);
+  // LEFT   bottom→top  outward = LEFT  (negative x)
+  vTab(ctx, px,    py+ch, py,        tabs.left   ? -tabs.left   * t : 0);
+  ctx.closePath();
+}
+
+/* ============================================================
+   CREATE PIECE CANVAS
+   Returns a <canvas> element showing the clipped image fragment.
+============================================================ */
+function createPieceCanvas(img, col, row, cw, ch, tabSz, tabs) {
+  const PAD = tabSz;                         // padding = tabSize
+  const pw  = Math.ceil(cw + PAD * 2);
+  const ph  = Math.ceil(ch + PAD * 2);
+  const canvas = document.createElement('canvas');
+  canvas.width  = pw;
+  canvas.height = ph;
+  const ctx = canvas.getContext('2d');
+
+  const px = PAD, py = PAD;                  // cell origin inside canvas
+  const t  = tabSz * 0.88;                   // actual protrusion (slightly less than padding)
+
+  // 1. Build + apply clip
+  buildPiecePath(ctx, px, py, cw, ch, tabs, t);
+  ctx.save();
+  ctx.clip();
+
+  // 2. Draw the full image so that the relevant cell aligns with (px, py)
+  ctx.drawImage(img, -col * cw + PAD, -row * ch + PAD, cw * COLS, ch * ROWS);
+  ctx.restore();
+
+  // 3. Bright edge highlight (inside clip)
+  buildPiecePath(ctx, px, py, cw, ch, tabs, t);
+  ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+  ctx.lineWidth   = 2;
+  ctx.stroke();
+
+  return canvas;
+}
+
+/* ============================================================
+   GAME STATE
+============================================================ */
+const state = {
+  puzzleIdx: 0,
+  pieces:     [],     // [{el, canvas, col, row, x, y, placed}]
+  placed:     0,
+  tabSz:      0,
+  cellW:      0,
+  cellH:      0,
+  boardRect:  null,  // {left,top,width,height} relative to #game-area
+};
+
+let activeDrag = null; // {piece, offX, offY, gaRect}
+
+/* ============================================================
+   SCREEN NAVIGATION
+============================================================ */
+function showMenu() {
+  document.getElementById('menu-screen').classList.add('active');
+  document.getElementById('game-screen').classList.remove('active');
+  stopConfetti();
+  document.getElementById('win-overlay').classList.remove('show');
+  clearGameArea();
+}
+
+function clearGameArea() {
+  document.querySelectorAll('.puzzle-piece').forEach(e => e.remove());
+  document.getElementById('puzzle-board').querySelectorAll('.board-slot').forEach(e => e.remove());
+  state.pieces  = [];
+  state.placed  = 0;
+  activeDrag    = null;
+}
+
+/* ============================================================
+   GALLERY
+============================================================ */
+function initGallery() {
+  const gallery = document.getElementById('puzzle-gallery');
+  PUZZLES.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'puzzle-card';
+    card.innerHTML = `
+      <img src="${p.url}" loading="lazy" crossorigin="anonymous" alt="${p.name}">
+      <div class="puzzle-card-name">${p.name}</div>
+    `;
+    card.addEventListener('pointerdown', () => startGame(i));
+    gallery.appendChild(card);
+  });
+}
+
+/* ============================================================
+   START GAME
+============================================================ */
+function startGame(idx) {
+  state.puzzleIdx = idx;
+  clearGameArea();
+
+  document.getElementById('menu-screen').classList.remove('active');
+  document.getElementById('game-screen').classList.add('active');
+  document.getElementById('puzzle-title-header').textContent = PUZZLES[idx].name;
+
+  updateProgress(0);
+
+  // Show loading
+  const loadOverlay = document.getElementById('loading-overlay');
+  loadOverlay.classList.add('show');
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload  = () => { loadOverlay.classList.remove('show'); buildPuzzle(img); };
+  img.onerror = () => { loadOverlay.classList.remove('show'); alert('Не удалось загрузить картинку. Проверь интернет-соединение.'); };
+  img.src = PUZZLES[idx].url;
+}
+
+/* ============================================================
+   BUILD PUZZLE
+============================================================ */
+function buildPuzzle(img) {
+  const boardArea   = document.getElementById('board-area');
+  const piecesArea  = document.getElementById('pieces-area');
+  const gameArea    = document.getElementById('game-area');
+  const board       = document.getElementById('puzzle-board');
+  const ghostImg    = document.getElementById('ghost-img');
+
+  // ---- Calculate board size ---------------------------------
+  const areaW = boardArea.clientWidth  - 28;
+  const areaH = boardArea.clientHeight - 28;
+  const size  = Math.min(areaW, areaH, 330);
+
+  board.style.width  = size + 'px';
+  board.style.height = size + 'px';
+
+  const cw  = size / COLS;
+  const ch  = size / ROWS;
+  const tsz = Math.round(Math.min(cw, ch) * 0.22);
+
+  state.cellW = cw;
+  state.cellH = ch;
+  state.tabSz = tsz;
+
+  // ---- Ghost image ------------------------------------------
+  ghostImg.src = PUZZLES[state.puzzleIdx].url;
+
+  // ---- Slots ------------------------------------------------
+  board.querySelectorAll('.board-slot').forEach(e => e.remove());
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const slot = document.createElement('div');
+      slot.className  = 'board-slot';
+      slot.id         = `slot-${r}-${c}`;
+      slot.style.left = (c * cw) + 'px';
+      slot.style.top  = (r * ch) + 'px';
+      slot.style.width  = cw + 'px';
+      slot.style.height = ch + 'px';
+      board.appendChild(slot);
+    }
+  }
+
+  // ---- Generate tabs ----------------------------------------
+  const tabs = generateTabs(PUZZLES[state.puzzleIdx].seed);
+  const rng  = makeRng(PUZZLES[state.puzzleIdx].seed + 9999);
+
+  // ---- Wait for layout, then measure & spawn pieces ---------
+  requestAnimationFrame(() => {
+    const gaRect  = gameArea.getBoundingClientRect();
+    const bRect   = board.getBoundingClientRect();
+    const paRect  = piecesArea.getBoundingClientRect();
+
+    state.boardRect = {
+      left:   bRect.left   - gaRect.left,
+      top:    bRect.top    - gaRect.top,
+      width:  size,
+      height: size,
+    };
+
+    const paLeft = paRect.left - gaRect.left;
+    const paTop  = paRect.top  - gaRect.top;
+
+    // Build and scatter pieces
+    const pieceW = Math.ceil(cw + tsz * 2);
+    const pieceH = Math.ceil(ch + tsz * 2);
+
+    // Soft-grid layout with jitter
+    const gridCols  = Math.max(1, Math.floor((paRect.width - 8) / (pieceW + 6)));
+    const cellSpacX = (paRect.width - 8) / gridCols;
+    const cellSpacY = pieceH + 10;
+
+    // Shuffle order for visual randomness
+    const order = Array.from({ length: TOTAL }, (_, i) => i).sort(() => rng() - 0.5);
+
+    order.forEach((idx, pos) => {
+      const col = idx % COLS;
+      const row = Math.floor(idx / COLS);
+
+      const pc = createPieceCanvas(img, col, row, cw, ch, tsz, tabs[row][col]);
+
+      const el = document.createElement('div');
+      el.className = 'puzzle-piece';
+      el.appendChild(pc);
+      el.style.width  = pc.width  + 'px';
+      el.style.height = pc.height + 'px';
+
+      const gc   = pos % gridCols;
+      const gr   = Math.floor(pos / gridCols);
+      const jx   = (rng() - 0.5) * 10;
+      const jy   = (rng() - 0.5) * 10;
+      const rot  = (rng() - 0.5) * 14;
+      const sx   = paLeft + 4 + gc * cellSpacX + jx;
+      const sy   = paTop  + 8 + gr * cellSpacY + jy;
+
+      el.style.left      = sx + 'px';
+      el.style.top       = sy + 'px';
+      el.style.zIndex    = 20 + pos;
+      el.style.transform = `rotate(${rot}deg)`;
+
+      const piece = { el, col, row, x: sx, y: sy, placed: false };
+      state.pieces.push(piece);
+      gameArea.appendChild(el);
+
+      // Attach pointer events
+      el.addEventListener('pointerdown', e => onDown(e, piece));
+    });
+  });
+}
+
+/* ============================================================
+   DRAG  –  POINTER DOWN
+============================================================ */
+function onDown(e, piece) {
+  if (piece.placed) return;
+  e.preventDefault();
+  e.stopPropagation();
+
+  const el     = piece.el;
+  const gaRect = document.getElementById('game-area').getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+
+  const offX = e.clientX - elRect.left;
+  const offY = e.clientY - elRect.top;
+
+  el.setPointerCapture(e.pointerId);
+  el.classList.add('dragging');
+  el.style.zIndex    = 1000;
+  el.style.transform = 'scale(1.08) rotate(0deg)';
+
+  activeDrag = { piece, offX, offY, gaRect };
+
+  el.addEventListener('pointermove', onMove);
+  el.addEventListener('pointerup',   onUp);
+  el.addEventListener('pointercancel', onUp);
+}
+
+/* ============================================================
+   DRAG  –  POINTER MOVE
+============================================================ */
+function onMove(e) {
+  if (!activeDrag) return;
+  e.preventDefault();
+
+  const { piece, offX, offY, gaRect } = activeDrag;
+  const el = piece.el;
+
+  const x = e.clientX - gaRect.left - offX;
+  const y = e.clientY - gaRect.top  - offY;
+
+  piece.x = x;
+  piece.y = y;
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+}
+
+/* ============================================================
+   DRAG  –  POINTER UP
+============================================================ */
+function onUp(e) {
+  if (!activeDrag) return;
+  e.preventDefault();
+
+  const { piece } = activeDrag;
+  const el = piece.el;
+
+  el.classList.remove('dragging');
+  el.releasePointerCapture(e.pointerId);
+  el.removeEventListener('pointermove', onMove);
+  el.removeEventListener('pointerup',   onUp);
+  el.removeEventListener('pointercancel', onUp);
+
+  activeDrag = null;
+
+  el.style.transform = 'rotate(0deg) scale(1)';
+  checkSnap(piece);
+}
+
+/* ============================================================
+   SNAP LOGIC
+============================================================ */
+function checkSnap(piece) {
+  if (piece.placed) return;
+
+  const { boardRect, cellW, cellH, tabSz } = state;
+
+  // Target = top-left of piece canvas when perfectly placed
+  const tx = boardRect.left + piece.col * cellW - tabSz;
+  const ty = boardRect.top  + piece.row * cellH - tabSz;
+
+  const dx = Math.abs(piece.x - tx);
+  const dy = Math.abs(piece.y - ty);
+
+  if (dx < SNAP && dy < SNAP) {
+    // ---- SNAP! ------------------------------------------------
+    piece.placed = true;
+    state.placed++;
+
+    const el = piece.el;
+    el.classList.add('snapping', 'placed');
+    el.style.left      = tx + 'px';
+    el.style.top       = ty + 'px';
+    el.style.zIndex    = 5;
+    el.style.transform = 'rotate(0deg) scale(1)';
+
+    // Mark slot filled
+    const slot = document.getElementById(`slot-${piece.row}-${piece.col}`);
+    if (slot) slot.classList.add('filled');
+
+    // Cleanup transition class
+    el.addEventListener('transitionend', () => el.classList.remove('snapping'), { once: true });
+
+    playSnapSound();
+    spawnStars(el);
+    updateProgress(state.placed);
+
+    if (state.placed === TOTAL) setTimeout(onWin, 350);
+  } else {
+    // Return small bounce
+    piece.el.style.transition = 'transform .15s';
+    piece.el.style.transform  = 'rotate(0deg) scale(1)';
+    setTimeout(() => { piece.el.style.transition = ''; }, 200);
+  }
+}
+
+/* ============================================================
+   WIN
+============================================================ */
+function onWin() {
+  playSuccessSound();
+  startConfetti();
+  document.getElementById('win-overlay').classList.add('show');
+}
+
+/* ============================================================
+   PROGRESS
+============================================================ */
+function updateProgress(n) {
+  document.getElementById('progress-label').textContent = `${n} / ${TOTAL}`;
+  document.getElementById('progress-bar-fill').style.width = (n / TOTAL * 100) + '%';
+}
+
+/* ============================================================
+   STARS
+============================================================ */
+function spawnStars(el) {
+  const rect = el.getBoundingClientRect();
+  const cx   = rect.left + rect.width  * 0.5;
+  const cy   = rect.top  + rect.height * 0.5;
+  const emojis = ['⭐', '✨', '🌟', '💫'];
+
+  emojis.forEach((em, i) => {
+    const s = document.createElement('div');
+    s.className = 'star-burst';
+    s.textContent = em;
+    s.style.left  = (cx - 11 + (i - 1.5) * 22) + 'px';
+    s.style.top   = (cy - 11) + 'px';
+    s.style.animationDelay = (i * 0.06) + 's';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 700);
+  });
+}
+
+/* ============================================================
+   AUDIO  (Web Audio API – no external files)
+============================================================ */
+let _audioCtx = null;
+function audioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+
+function playSnapSound() {
+  try {
+    const ac = audioCtx();
+    if (ac.state === 'suspended') ac.resume();
+    const osc  = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(520, ac.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, ac.currentTime + 0.07);
+    gain.gain.setValueAtTime(0.22, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.14);
+    osc.start(ac.currentTime);
+    osc.stop(ac.currentTime + 0.14);
+  } catch (_) {}
+}
+
+function playSuccessSound() {
+  // Ascending arpeggio  C5 – E5 – G5 – C6
+  const freqs = [523.25, 659.25, 783.99, 1046.50];
+  try {
+    const ac = audioCtx();
+    if (ac.state === 'suspended') ac.resume();
+    freqs.forEach((f, i) => {
+      const osc  = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.connect(gain); gain.connect(ac.destination);
+      osc.type = 'sine';
+      const t = ac.currentTime + i * 0.14;
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.28, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+      osc.start(t); osc.stop(t + 0.45);
+    });
+  } catch (_) {}
+}
+
+/* ============================================================
+   CONFETTI
+============================================================ */
+const CONF_COLORS = ['#FF6B35','#4ECDC4','#FFE66D','#FF4081','#69F0AE','#448AFF','#E040FB'];
+let confRAF = null;
+let confParts = [];
+
+function startConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+
+  confParts = [];
+  for (let i = 0; i < 140; i++) {
+    confParts.push({
+      x:    Math.random() * canvas.width,
+      y:    -10 - Math.random() * 200,
+      vx:   (Math.random() - 0.5) * 5,
+      vy:   1.5 + Math.random() * 4,
+      sz:   5 + Math.random() * 9,
+      rot:  Math.random() * Math.PI * 2,
+      rs:   (Math.random() - 0.5) * 0.25,
+      col:  CONF_COLORS[Math.floor(Math.random() * CONF_COLORS.length)],
+      rect: Math.random() > 0.45,
+    });
+  }
+
+  if (confRAF) cancelAnimationFrame(confRAF);
+
+  const frame = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    confParts.forEach(p => {
+      p.x   += p.vx;
+      p.y   += p.vy;
+      p.vy  += 0.06;
+      p.vx  += (Math.random() - 0.5) * 0.1;
+      p.rot += p.rs;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.col;
+      if (p.rect) ctx.fillRect(-p.sz * 0.5, -p.sz * 0.25, p.sz, p.sz * 0.5);
+      else {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.sz * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    confParts = confParts.filter(p => p.y < canvas.height + 60);
+    if (confParts.length) confRAF = requestAnimationFrame(frame);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  confRAF = requestAnimationFrame(frame);
+  setTimeout(stopConfetti, 5500);
+}
+
+function stopConfetti() {
+  if (confRAF) { cancelAnimationFrame(confRAF); confRAF = null; }
+  confParts = [];
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
+/* ============================================================
+   ORIENTATION CHECK
+============================================================ */
+function checkOrientation() {
+  const overlay = document.getElementById('orient-overlay');
+  const isLandscape = window.innerWidth > window.innerHeight;
+  overlay.classList.toggle('show', !isLandscape);
+}
+
+window.addEventListener('resize', checkOrientation);
+checkOrientation();
+
+/* ============================================================
+   BUTTON WIRING
+============================================================ */
+document.getElementById('back-btn').addEventListener('click', showMenu);
+
+document.getElementById('btn-again').addEventListener('click', () => {
+  document.getElementById('win-overlay').classList.remove('show');
+  stopConfetti();
+  startGame(state.puzzleIdx);
+});
+
+document.getElementById('btn-menu').addEventListener('click', () => {
+  document.getElementById('win-overlay').classList.remove('show');
+  stopConfetti();
+  showMenu();
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+initGallery();
+
+/* ============================================================
+   SERVICE WORKER
+============================================================ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
