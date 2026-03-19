@@ -420,7 +420,7 @@
     <div id="pieces-area"></div>
     <div id="board-area">
       <div id="puzzle-board">
-        <img id="ghost-img" crossorigin="anonymous" alt="">
+        <img id="ghost-img" alt="">
         <!-- .board-slot elements injected here -->
         <!-- .puzzle-piece elements injected into #game-area -->
       </div>
@@ -457,11 +457,15 @@
    PUZZLE DEFINITIONS
 ============================================================ */
 const PUZZLES = [
-  { name: '🐶 Щенок',   url: 'https://picsum.photos/id/237/600/600', seed: 42  },
-  { name: '🐱 Котик',   url: 'https://picsum.photos/id/40/600/600',  seed: 73  },
-  { name: '🌸 Цветы',   url: 'https://picsum.photos/id/152/600/600', seed: 99  },
-  { name: '🌲 Лес',     url: 'https://picsum.photos/id/10/600/600',  seed: 15  },
-  { name: '🏔️ Горы',   url: 'https://picsum.photos/id/29/600/600',  seed: 57  },
+  { name: '🦇 Бэтмен',       url: 'assets/batman.jpg',         seed: 42  },
+  { name: '🕷️ Человек-паук', url: 'assets/spider-man.jpg',      seed: 73  },
+  { name: '🤖 Железный',     url: 'assets/iron-man.jpg',        seed: 99  },
+  { name: '🛡️ Капитан',     url: 'assets/capitan-america.jpg', seed: 15  },
+  { name: '💪 Халк',         url: 'assets/hulk.jpg',            seed: 57  },
+  { name: '🦠 Веном',       url: 'assets/venom.jpg',          seed: 31  },
+  { name: '🔴 Дэдпул',      url: 'assets/deadpool.jpg',        seed: 88  },
+  { name: '✨ Стрэндж',     url: 'assets/dr-strendj.jpg',      seed: 55  },
+  { name: '💜 Танос',        url: 'assets/tanos.jpg',           seed: 77  },
 ];
 
 const COLS   = 3;
@@ -639,7 +643,7 @@ function initGallery() {
     const card = document.createElement('div');
     card.className = 'puzzle-card';
     card.innerHTML = `
-      <img src="${p.url}" loading="lazy" crossorigin="anonymous" alt="${p.name}">
+      <img src="${p.url}" loading="lazy" alt="${p.name}">
       <div class="puzzle-card-name">${p.name}</div>
     `;
     card.addEventListener('pointerdown', () => startGame(i));
@@ -665,7 +669,6 @@ function startGame(idx) {
   loadOverlay.classList.add('show');
 
   const img = new Image();
-  img.crossOrigin = 'anonymous';
   img.onload  = () => { loadOverlay.classList.remove('show'); buildPuzzle(img); };
   img.onerror = () => { loadOverlay.classList.remove('show'); alert('Не удалось загрузить картинку. Проверь интернет-соединение.'); };
   img.src = PUZZLES[idx].url;
