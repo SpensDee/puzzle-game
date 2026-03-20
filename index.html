@@ -10,6 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#FF6B35">
   <link rel="manifest" href="manifest.json">
+  <meta name="robots" content="noindex">
   <title>Puzzle Fun! 🧩</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -51,35 +52,6 @@
       display: none;
     }
     .screen.active { display: flex; }
-
-    /* ============================================================
-       PORTRAIT WARNING
-    ============================================================ */
-    #portrait-warning {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 99999;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-    }
-    #portrait-warning.show { 
-      display: flex; 
-      overflow: hidden;
-    }
-    #portrait-warning .rotate-icon {
-      font-size: 80px;
-      transform: rotate(-90deg);
-    }
-    #portrait-warning p {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--dark);
-      text-align: center;
-    }
 
     /* ============================================================
        MENU SCREEN
@@ -1064,18 +1036,9 @@ document.getElementById('btn-menu').addEventListener('click', () => {
 document.addEventListener('contextmenu', e => e.preventDefault());
 initGallery();
 
-/* ============================================================
-   ORIENTATION CHECK
-============================================================ */
-function checkOrientation() {
-  const warning = document.getElementById('portrait-warning');
-  const isLandscape = window.innerWidth > window.innerHeight;
-  warning.classList.toggle('show', !isLandscape);
+if ('screen' in window && 'orientation' in screen) {
+  screen.orientation.lock('landscape').catch(() => {});
 }
-
-window.addEventListener('resize', checkOrientation);
-window.addEventListener('orientationchange', checkOrientation);
-checkOrientation();
 
 /* ============================================================
    SERVICE WORKER
