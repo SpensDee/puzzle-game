@@ -2,7 +2,9 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="screen-orientation" content="landscape">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -46,27 +48,32 @@
     .screen.active { display: flex; }
 
     /* ============================================================
-       ORIENTATION OVERLAY
+       PORTRAIT WARNING
     ============================================================ */
-    #orient-overlay {
-      position: fixed; inset: 0; z-index: 99999;
+    #portrait-warning {
+      display: none;
+      position: fixed;
+      inset: 0;
       background: var(--bg);
+      z-index: 99999;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
-      display: none;
+      gap: 20px;
     }
-    #orient-overlay.show { display: flex; }
-    #orient-overlay .icon { font-size: 72px; animation: spin 2s linear infinite; }
-    @keyframes spin {
-      0%   { transform: rotate(0deg); }
-      25%  { transform: rotate(-90deg); }
-      50%  { transform: rotate(-90deg); }
-      100% { transform: rotate(-90deg); }
+    #portrait-warning.show { 
+      display: flex; 
+      overflow: hidden;
     }
-    #orient-overlay p {
-      font-size: 20px; font-weight: 800; color: var(--dark); text-align: center;
+    #portrait-warning .rotate-icon {
+      font-size: 80px;
+      transform: rotate(-90deg);
+    }
+    #portrait-warning p {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--dark);
+      text-align: center;
     }
 
     /* ============================================================
@@ -75,39 +82,39 @@
     #menu-screen {
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 20px;
-      padding: 16px 24px;
+      justify-content: flex-start;
+      padding: 16px 0;
       background:
         radial-gradient(ellipse at 20% 20%, rgba(255,107,53,.12) 0%, transparent 60%),
         radial-gradient(ellipse at 80% 80%, rgba(78,205,196,.12) 0%, transparent 60%),
         var(--bg);
     }
 
-    .menu-title {
-      font-size: clamp(26px, 5vw, 56px);
-      font-weight: 900;
-      color: var(--dark);
-      letter-spacing: -1px;
-      text-align: center;
-    }
-    .menu-title .grad {
-      background: linear-gradient(135deg, var(--primary) 0%, #FF8C42 50%, var(--secondary) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
     #puzzle-gallery {
       display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      justify-content: center;
-      max-width: 760px;
+      flex-wrap: nowrap;
+      gap: 16px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 14px 20px;
+      justify-content: flex-start;
+      align-items: stretch;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
     }
+    #puzzle-gallery::-webkit-scrollbar { height: 6px; }
+    #puzzle-gallery::-webkit-scrollbar-track { background: rgba(0,0,0,.1); border-radius: 3px; }
+    #puzzle-gallery::-webkit-scrollbar-thumb { background: rgba(255,107,53,.4); border-radius: 3px; }
 
     .puzzle-card {
-      width: clamp(110px, 18vw, 170px);
+      flex: 0 0 auto;
+      width: clamp(140px, 20vw, 220px);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
       border-radius: var(--radius);
       overflow: hidden;
       cursor: pointer;
@@ -115,18 +122,24 @@
       box-shadow: 0 4px 20px rgba(0,0,0,.1);
       transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
       border: 3px solid transparent;
+      scroll-snap-align: center;
     }
-    .puzzle-card:hover  { transform: translateY(-5px) scale(1.04); box-shadow: 0 12px 32px rgba(0,0,0,.18); }
+    .puzzle-card:hover  { transform: scale(1.05); box-shadow: 0 12px 32px rgba(0,0,0,.18); }
     .puzzle-card:active { transform: scale(.97); }
 
     .puzzle-card img {
-      width: 100%; aspect-ratio: 1/1;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      aspect-ratio: 1/1;
       object-fit: cover; display: block;
     }
     .puzzle-card-name {
-      padding: 6px 10px 10px;
-      font-size: 13px; font-weight: 800;
+      padding: 8px 10px;
+      font-size: 14px; font-weight: 800;
       color: var(--dark); text-align: center;
+      flex-shrink: 0;
+      background: white;
     }
 
     /* ============================================================
@@ -147,7 +160,6 @@
       padding: 0 14px;
       gap: 12px;
       flex-shrink: 0;
-      border-bottom: 2px solid rgba(0,0,0,.05);
     }
 
     #back-btn {
@@ -195,31 +207,11 @@
     #game-area {
       flex: 1;
       display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
       overflow: hidden;
       min-height: 0;
-    }
-
-    /* --- Pieces Tray --- */
-    #pieces-area {
-      width: 33%;
-      min-width: 90px;
-      max-width: 200px;
-      height: 100%;
-      background: var(--tray-bg);
-      position: relative;
-      border-right: 2px dashed rgba(255,107,53,.22);
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    #pieces-area::before {
-      content: 'Кусочки';
-      position: absolute; bottom: 8px; left: 50%;
-      transform: translateX(-50%);
-      font-size: 10px; font-weight: 800;
-      color: rgba(45,49,66,.25);
-      pointer-events: none; white-space: nowrap;
-      letter-spacing: 1px; text-transform: uppercase;
     }
 
     /* --- Board Area --- */
@@ -230,10 +222,11 @@
       justify-content: center;
       padding: 14px;
       position: relative;
+      height: 100%;
     }
 
     #puzzle-board {
-      position: relative;
+      position: absolute;
       border-radius: 14px;
       box-shadow:
         0 0 0 3px rgba(78,205,196,.35),
@@ -278,7 +271,12 @@
       filter: drop-shadow(0 4px 8px rgba(0,0,0,.22));
       transition: filter .2s;
     }
-    .puzzle-piece canvas { display: block; }
+    .puzzle-piece canvas { 
+      display: block; 
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
     .puzzle-piece.dragging {
       cursor: grabbing;
@@ -387,17 +385,18 @@
 </head>
 <body>
 
-<!-- Orientation warning -->
-<div id="orient-overlay">
-  <div class="icon">📱</div>
-  <p>Поверни телефон горизонтально! 🔄</p>
+<!-- ============================================================
+     PORTRAIT WARNING
+============================================================ -->
+<div id="portrait-warning">
+  <div class="rotate-icon">📱</div>
+  <p>Поверни устройство<br>горизонтально</p>
 </div>
 
 <!-- ============================================================
      MENU SCREEN
 ============================================================ -->
 <div id="menu-screen" class="screen active">
-  <h1 class="menu-title">🧩 <span class="grad">Puzzle Fun!</span></h1>
   <div id="puzzle-gallery"></div>
 </div>
 
@@ -417,12 +416,9 @@
   </div>
 
   <div id="game-area">
-    <div id="pieces-area"></div>
     <div id="board-area">
       <div id="puzzle-board">
         <img id="ghost-img" alt="">
-        <!-- .board-slot elements injected here -->
-        <!-- .puzzle-piece elements injected into #game-area -->
       </div>
       <div id="loading-overlay">
         <div class="spinner"></div>
@@ -679,7 +675,6 @@ function startGame(idx) {
 ============================================================ */
 function buildPuzzle(img) {
   const boardArea   = document.getElementById('board-area');
-  const piecesArea  = document.getElementById('pieces-area');
   const gameArea    = document.getElementById('game-area');
   const board       = document.getElementById('puzzle-board');
   const ghostImg    = document.getElementById('ghost-img');
@@ -687,7 +682,7 @@ function buildPuzzle(img) {
   // ---- Calculate board size ---------------------------------
   const areaW = boardArea.clientWidth  - 28;
   const areaH = boardArea.clientHeight - 28;
-  const size  = Math.min(areaW, areaH, 330);
+  const size  = Math.min(areaW, areaH, 500);
 
   board.style.width  = size + 'px';
   board.style.height = size + 'px';
@@ -724,9 +719,8 @@ function buildPuzzle(img) {
 
   // ---- Wait for layout, then measure & spawn pieces ---------
   requestAnimationFrame(() => {
-    const gaRect  = gameArea.getBoundingClientRect();
-    const bRect   = board.getBoundingClientRect();
-    const paRect  = piecesArea.getBoundingClientRect();
+    const gaRect = gameArea.getBoundingClientRect();
+    const bRect  = board.getBoundingClientRect();
 
     state.boardRect = {
       left:   bRect.left   - gaRect.left,
@@ -735,22 +729,42 @@ function buildPuzzle(img) {
       height: size,
     };
 
-    const paLeft = paRect.left - gaRect.left;
-    const paTop  = paRect.top  - gaRect.top;
-
-    // Build and scatter pieces
+    // Build and scatter pieces randomly in game area (not touching board)
     const pieceW = Math.ceil(cw + tsz * 2);
     const pieceH = Math.ceil(ch + tsz * 2);
 
-    // Soft-grid layout with jitter
-    const gridCols  = Math.max(1, Math.floor((paRect.width - 8) / (pieceW + 6)));
-    const cellSpacX = (paRect.width - 8) / gridCols;
-    const cellSpacY = pieceH + 10;
+    const gaW = gaRect.width;
+    const gaH = gaRect.height;
+    const boardX = bRect.left - gaRect.left;
+    const boardY = bRect.top - gaRect.top;
+    const margin = 10;
+    const boardBuffer = 20;
 
-    // Shuffle order for visual randomness
+    // Calculate safe zones (areas not overlapping with board)
+    const safeZones = [
+      // Left of board
+      { x: margin, y: margin, w: boardX - pieceW - margin * 2 - boardBuffer, h: gaH - margin * 2 },
+      // Right of board  
+      { x: boardX + size + margin + boardBuffer, y: margin, w: gaW - boardX - size - margin * 2 - boardBuffer, h: gaH - margin * 2 },
+      // Above board
+      { x: margin, y: margin, w: gaW - margin * 2, h: boardY - pieceH - margin * 2 - boardBuffer },
+      // Below board
+      { x: margin, y: boardY + size + margin + boardBuffer, w: gaW - margin * 2, h: gaH - boardY - size - margin * 2 - boardBuffer },
+    ].filter(z => z.w > pieceW && z.h > pieceH);
+
+    // Generate random positions in safe zones
+    const positions = [];
+    for (let i = 0; i < TOTAL; i++) {
+      const zone = safeZones[Math.floor(rng() * safeZones.length)];
+      const x = zone.x + rng() * Math.max(0, zone.w - pieceW);
+      const y = zone.y + rng() * Math.max(0, zone.h - pieceH);
+      positions.push({ x: Math.max(margin, Math.min(x, gaW - pieceW - margin)), y: Math.max(margin, Math.min(y, gaH - pieceH - margin)) });
+    }
+
+    // Shuffle order for pieces
     const order = Array.from({ length: TOTAL }, (_, i) => i).sort(() => rng() - 0.5);
 
-    order.forEach((idx, pos) => {
+    order.forEach((idx, i) => {
       const col = idx % COLS;
       const row = Math.floor(idx / COLS);
 
@@ -759,27 +773,22 @@ function buildPuzzle(img) {
       const el = document.createElement('div');
       el.className = 'puzzle-piece';
       el.appendChild(pc);
-      el.style.width  = pc.width  + 'px';
-      el.style.height = pc.height + 'px';
+      el.style.width  = pieceW + 'px';
+      el.style.height = pieceH + 'px';
 
-      const gc   = pos % gridCols;
-      const gr   = Math.floor(pos / gridCols);
-      const jx   = (rng() - 0.5) * 10;
-      const jy   = (rng() - 0.5) * 10;
-      const rot  = (rng() - 0.5) * 14;
-      const sx   = paLeft + 4 + gc * cellSpacX + jx;
-      const sy   = paTop  + 8 + gr * cellSpacY + jy;
+      const pos = positions[i];
+      
+      const sx = pos.x;
+      const sy = pos.y;
 
       el.style.left      = sx + 'px';
       el.style.top       = sy + 'px';
-      el.style.zIndex    = 20 + pos;
-      el.style.transform = `rotate(${rot}deg)`;
+      el.style.zIndex    = 20 + i;
 
       const piece = { el, col, row, x: sx, y: sy, placed: false };
       state.pieces.push(piece);
       gameArea.appendChild(el);
 
-      // Attach pointer events
       el.addEventListener('pointerdown', e => onDown(e, piece));
     });
   });
@@ -803,7 +812,6 @@ function onDown(e, piece) {
   el.setPointerCapture(e.pointerId);
   el.classList.add('dragging');
   el.style.zIndex    = 1000;
-  el.style.transform = 'scale(1.08) rotate(0deg)';
 
   activeDrag = { piece, offX, offY, gaRect };
 
@@ -822,8 +830,8 @@ function onMove(e) {
   const { piece, offX, offY, gaRect } = activeDrag;
   const el = piece.el;
 
-  const x = e.clientX - gaRect.left - offX;
-  const y = e.clientY - gaRect.top  - offY;
+  const x = Math.max(0, Math.min(e.clientX - gaRect.left - offX, gaRect.width - el.offsetWidth));
+  const y = Math.max(0, Math.min(e.clientY - gaRect.top - offY, gaRect.height - el.offsetHeight));
 
   piece.x = x;
   piece.y = y;
@@ -878,7 +886,7 @@ function checkSnap(piece) {
     el.style.left      = tx + 'px';
     el.style.top       = ty + 'px';
     el.style.zIndex    = 5;
-    el.style.transform = 'rotate(0deg) scale(1)';
+
 
     // Mark slot filled
     const slot = document.getElementById(`slot-${piece.row}-${piece.col}`);
@@ -1054,18 +1062,6 @@ function stopConfetti() {
 }
 
 /* ============================================================
-   ORIENTATION CHECK
-============================================================ */
-function checkOrientation() {
-  const overlay = document.getElementById('orient-overlay');
-  const isLandscape = window.innerWidth > window.innerHeight;
-  overlay.classList.toggle('show', !isLandscape);
-}
-
-window.addEventListener('resize', checkOrientation);
-checkOrientation();
-
-/* ============================================================
    BUTTON WIRING
 ============================================================ */
 document.getElementById('back-btn').addEventListener('click', showMenu);
@@ -1086,6 +1082,19 @@ document.getElementById('btn-menu').addEventListener('click', () => {
    INIT
 ============================================================ */
 initGallery();
+
+/* ============================================================
+   ORIENTATION CHECK
+============================================================ */
+function checkOrientation() {
+  const warning = document.getElementById('portrait-warning');
+  const isLandscape = window.innerWidth > window.innerHeight;
+  warning.classList.toggle('show', !isLandscape);
+}
+
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', checkOrientation);
+checkOrientation();
 
 /* ============================================================
    SERVICE WORKER
