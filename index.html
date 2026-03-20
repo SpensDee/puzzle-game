@@ -747,11 +747,12 @@ function buildPuzzle(img) {
 
     // Generate random positions in safe zones
     const positions = [];
+    const overflow = 30;
     for (let i = 0; i < TOTAL; i++) {
       const zone = safeZones[Math.floor(rng() * safeZones.length)];
       const x = zone.x + rng() * Math.max(0, zone.w - pieceW);
       const y = zone.y + rng() * Math.max(0, zone.h - pieceH);
-      positions.push({ x: Math.max(margin, Math.min(x, gaW - pieceW - margin)), y: Math.max(margin, Math.min(y, gaH - pieceH - margin)) });
+      positions.push({ x, y });
     }
 
     // Shuffle order for pieces
@@ -822,9 +823,10 @@ function onMove(e) {
 
   const { piece, offX, offY, gaRect } = activeDrag;
   const el = piece.el;
+  const overflow = 40;
 
-  const x = Math.max(0, Math.min(e.clientX - gaRect.left - offX, gaRect.width - el.offsetWidth));
-  const y = Math.max(0, Math.min(e.clientY - gaRect.top - offY, gaRect.height - el.offsetHeight));
+  const x = Math.max(-overflow, Math.min(e.clientX - gaRect.left - offX, gaRect.width - el.offsetWidth + overflow));
+  const y = Math.max(-overflow, Math.min(e.clientY - gaRect.top - offY, gaRect.height - el.offsetHeight + overflow));
 
   piece.x = x;
   piece.y = y;
