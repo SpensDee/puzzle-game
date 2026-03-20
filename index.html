@@ -305,11 +305,9 @@
     #win-overlay.show { display: flex; }
 
     #win-card {
-      background: white;
       border-radius: 28px;
       padding: 24px 40px;
       text-align: center;
-      box-shadow: 0 -4px 30px rgba(0,0,0,.2);
       animation: slideUp .45s cubic-bezier(.34,1.56,.64,1);
     }
     @keyframes slideUp {
@@ -422,8 +420,6 @@
 <!-- Win overlay -->
 <div id="win-overlay">
   <div id="win-card">
-    <span class="win-emoji">🎉</span>
-    <h2>Молодец!</h2>
     <div class="win-btns">
       <button class="win-btn orange" id="btn-again">Ещё раз!</button>
       <button class="win-btn teal"   id="btn-menu">Меню</button>
@@ -574,12 +570,6 @@ function createPieceCanvas(img, col, row, cw, ch, tabSz, tabs) {
   // 2. Draw the full image so that the relevant cell aligns with (px, py)
   ctx.drawImage(img, -col * cw + PAD, -row * ch + PAD, cw * COLS, ch * ROWS);
   ctx.restore();
-
-  // 3. Bright edge highlight (inside clip)
-  buildPiecePath(ctx, px, py, cw, ch, tabs, t);
-  ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-  ctx.lineWidth   = 2;
-  ctx.stroke();
 
   return canvas;
 }
