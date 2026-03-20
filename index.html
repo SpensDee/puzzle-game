@@ -5,21 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="screen-orientation" content="landscape">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#FF6B35">
   <link rel="manifest" href="manifest.json">
   <meta name="robots" content="noindex">
-  <link rel="apple-touch-icon" href="assets/icon-512.png">
-
   <link rel="icon" href="assets/icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icon.png">
   <title>Puzzle Fun! 🧩</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
   <style>
-    /* ============================================================
-       BASE
-    ============================================================ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -28,9 +23,7 @@
       --secondary: #4ECDC4;
       --accent:    #FFE66D;
       --dark:      #2D3142;
-      --tray-bg:   #FFF0E6;
       --radius:    18px;
-      --header-h:  52px;
     }
 
     html, body {
@@ -57,18 +50,115 @@
     .screen.active { display: flex; }
 
     /* ============================================================
-       MENU SCREEN
+       MENU SCREEN — CATEGORIES
     ============================================================ */
     #menu-screen {
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      padding: 16px 0;
+      justify-content: center;
       background:
         radial-gradient(ellipse at 20% 20%, rgba(255,107,53,.12) 0%, transparent 60%),
         radial-gradient(ellipse at 80% 80%, rgba(78,205,196,.12) 0%, transparent 60%),
         var(--bg);
     }
+
+    /* --- Categories view --- */
+    #categories-view {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 28px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 20px 32px;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100%;
+      height: 100%;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+    }
+    #categories-view::-webkit-scrollbar { height: 6px; }
+    #categories-view::-webkit-scrollbar-track { background: rgba(0,0,0,.08); border-radius: 3px; }
+    #categories-view::-webkit-scrollbar-thumb { background: rgba(255,107,53,.4); border-radius: 3px; }
+
+    /* --- Category fan card --- */
+    .cat-card {
+      flex: 0 0 auto;
+      position: relative;
+      cursor: pointer;
+      scroll-snap-align: center;
+      /* total touch area */
+      width: 180px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+    }
+    .cat-card:active { transform: scale(.94); }
+
+    /* The 3 fanned images */
+    .cat-card .fan-img {
+      position: absolute;
+      width: 120px;
+      height: 150px;
+      border-radius: 14px;
+      object-fit: cover;
+      box-shadow: 0 6px 20px rgba(0,0,0,.22);
+      border: 3px solid white;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+      backface-visibility: hidden;
+    }
+    .cat-card .fan-img:nth-child(1) {
+      transform: rotate(-14deg) translate(-44px, 6px);
+      z-index: 1;
+    }
+    .cat-card .fan-img:nth-child(2) {
+      transform: rotate(0deg) translate(0px, -8px);
+      z-index: 3;
+    }
+    .cat-card .fan-img:nth-child(3) {
+      transform: rotate(14deg) translate(44px, 6px);
+      z-index: 2;
+    }
+
+    /* Hover: fan opens wider */
+    .cat-card:hover .fan-img:nth-child(1) {
+      transform: rotate(-22deg) translate(-60px, 10px);
+    }
+    .cat-card:hover .fan-img:nth-child(2) {
+      transform: rotate(0deg) translate(0px, -16px);
+    }
+    .cat-card:hover .fan-img:nth-child(3) {
+      transform: rotate(22deg) translate(60px, 10px);
+    }
+
+    /* ============================================================
+       PUZZLE GALLERY (within category)
+    ============================================================ */
+    #gallery-view {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+    #gallery-view.active { display: flex; }
+
+    #gallery-back-btn {
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      display: flex; align-items: center; gap: 6px;
+      background: var(--primary);
+      color: white; border: none; border-radius: 12px;
+      padding: 6px 14px;
+      font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(255,107,53,.4);
+      transition: transform .15s;
+      z-index: 100;
+    }
+    #gallery-back-btn:active { transform: scale(.93); }
 
     #puzzle-gallery {
       display: flex;
@@ -106,7 +196,6 @@
     }
     .puzzle-card:hover  { transform: scale(1.05); box-shadow: 0 12px 32px rgba(0,0,0,.18); }
     .puzzle-card:active { transform: scale(.97); }
-
     .puzzle-card img {
       width: 100%;
       flex: 1;
@@ -114,7 +203,6 @@
       aspect-ratio: 1/1;
       object-fit: cover; display: block;
     }
-
 
     /* ============================================================
        GAME SCREEN
@@ -126,7 +214,6 @@
         var(--bg);
     }
 
-     /* --- Fixed Header Elements --- */
     #back-btn {
       position: fixed;
       top: 10px;
@@ -167,7 +254,6 @@
       transition: width .4s cubic-bezier(.34,1.56,.64,1);
     }
 
-    /* --- Game Area --- */
     #game-area {
       flex: 1;
       display: flex;
@@ -178,7 +264,6 @@
       min-height: 0;
     }
 
-    /* --- Board Area --- */
     #board-area {
       flex: 1;
       display: flex;
@@ -200,7 +285,6 @@
       flex-shrink: 0;
     }
 
-    /* Slot ghost outlines */
     .board-slot {
       position: absolute;
       border: 2px dashed rgba(78,205,196,.45);
@@ -214,7 +298,6 @@
       border-color: transparent;
     }
 
-    /* Ghost image overlay */
     #ghost-img {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
@@ -223,9 +306,6 @@
       user-select: none;
     }
 
-    /* ============================================================
-       PUZZLE PIECES
-    ============================================================ */
     .puzzle-piece {
       position: absolute;
       cursor: grab;
@@ -235,13 +315,12 @@
       filter: drop-shadow(0 4px 8px rgba(0,0,0,.22));
       transition: filter .2s;
     }
-    .puzzle-piece canvas { 
-      display: block; 
+    .puzzle-piece canvas {
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: contain;
     }
-
     .puzzle-piece.dragging {
       cursor: grabbing;
       filter: drop-shadow(0 10px 24px rgba(0,0,0,.38));
@@ -259,17 +338,11 @@
         filter .2s;
     }
 
-    /* ============================================================
-       CONFETTI CANVAS
-    ============================================================ */
     #confetti-canvas {
       position: fixed; inset: 0;
       pointer-events: none; z-index: 9999;
     }
 
-    /* ============================================================
-       WIN OVERLAY
-    ============================================================ */
     #win-overlay {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: transparent;
@@ -290,13 +363,6 @@
       to   { transform: translateY(0); opacity: 1; }
     }
 
-    #win-card .win-emoji { font-size: 40px; display: block; margin-bottom: 4px; }
-    #win-card h2 {
-      font-size: clamp(18px, 4vw, 28px); font-weight: 900;
-      color: var(--dark); margin-bottom: 16px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
     .win-btns { display: flex; gap: 12px; justify-content: center; }
     .win-btn {
       border: none; border-radius: 14px;
@@ -310,9 +376,6 @@
     .win-btn.orange { background: linear-gradient(135deg, var(--primary), #FF8C42); }
     .win-btn.teal   { background: linear-gradient(135deg, var(--secondary), #26A69A); }
 
-    /* ============================================================
-       STAR BURST
-    ============================================================ */
     .star-burst {
       position: fixed; pointer-events: none; font-size: 22px;
       animation: starPop .55s ease-out forwards;
@@ -324,9 +387,6 @@
       100% { transform: scale(0) translateY(-40px); opacity: 0; }
     }
 
-    /* ============================================================
-       LOADING SPINNER
-    ============================================================ */
     #loading-overlay {
       position: absolute; inset: 0;
       display: none; align-items: center; justify-content: center;
@@ -349,18 +409,19 @@
 <body>
 
 <!-- ============================================================
-     PORTRAIT WARNING
-============================================================ -->
-<div id="portrait-warning">
-  <div class="rotate-icon">📱</div>
-  <p>Поверни устройство<br>горизонтально</p>
-</div>
-
-<!-- ============================================================
      MENU SCREEN
 ============================================================ -->
 <div id="menu-screen" class="screen active">
-  <div id="puzzle-gallery"></div>
+
+  <!-- CATEGORIES VIEW (default) -->
+  <div id="categories-view"></div>
+
+  <!-- GALLERY VIEW (after tapping a category) -->
+  <div id="gallery-view">
+    <button id="gallery-back-btn">← Назад</button>
+    <div id="puzzle-gallery"></div>
+  </div>
+
 </div>
 
 <!-- ============================================================
@@ -389,10 +450,8 @@
   </div>
 </div>
 
-<!-- Confetti canvas -->
 <canvas id="confetti-canvas"></canvas>
 
-<!-- Win overlay -->
 <div id="win-overlay">
   <div id="win-card">
     <div class="win-btns">
@@ -409,27 +468,53 @@
 'use strict';
 
 /* ============================================================
-   PUZZLE DEFINITIONS
+   PUZZLE DEFINITIONS — с категориями
+   Добавляй новые категории / пазлы сюда
 ============================================================ */
-const PUZZLES = [
-  { name: '🦇 Бэтмен',       url: 'assets/batman.jpg',         seed: 42  },
-  { name: '🕷️ Человек-паук', url: 'assets/spider-man.jpg',      seed: 73  },
-  { name: '🤖 Железный',     url: 'assets/iron-man.jpg',        seed: 99  },
-  { name: '🛡️ Капитан',     url: 'assets/capitan-america.jpg', seed: 15  },
-  { name: '💪 Халк',         url: 'assets/hulk.jpg',            seed: 57  },
-  { name: '🦠 Веном',       url: 'assets/venom.jpg',          seed: 31  },
-  { name: '🔴 Дэдпул',      url: 'assets/deadpool.jpg',        seed: 88  },
-  { name: '✨ Стрэндж',     url: 'assets/dr-strendj.jpg',      seed: 55  },
-  { name: '💜 Танос',        url: 'assets/tanos.jpg',           seed: 77  },
+const CATEGORIES = [
+  {
+    id: 'heroes',
+    puzzles: [
+      { name: '🦇 Бэтмен',       url: 'assets/batman.jpg',         seed: 42  },
+      { name: '🕷️ Человек-паук', url: 'assets/spider-man.jpg',      seed: 73  },
+      { name: '🤖 Железный человек', url: 'assets/iron-man.jpg', seed: 99  },
+      { name: '🛡️ Капитан',     url: 'assets/capitan-america.jpg', seed: 15  },
+      { name: '💪 Халк',         url: 'assets/hulk.jpg',            seed: 57  },
+      { name: '🦠 Веном',        url: 'assets/venom.jpg',           seed: 31  },
+      { name: '🔴 Дэдпул',       url: 'assets/deadpool.jpg',        seed: 88  },
+      { name: '✨ Стрэндж',      url: 'assets/dr-strendj.jpg',      seed: 55  },
+      { name: '💜 Танос',        url: 'assets/tanos.jpg',           seed: 77  },
+    ]
+  },
+  {
+    id: 'Heroes 2',
+    puzzles: [
+      { url: 'assets/r-iron-man.jpg',     seed: 64  },
+      { url: 'assets/r-lizard.jpg',        seed: 71  },
+      { url: 'assets/r-spiderman.jpg',     seed: 82  },
+      { url: 'assets/r-spiderwooman.jpg',  seed: 93  },
+      { url: 'assets/r-tanos.jpg',         seed: 15  },
+      { url: 'assets/r-venom.jpg',         seed: 31  },
+      { url: 'assets/r-wolverine.jpg',     seed: 47  },
+    ]
+  }
 ];
+
+/* flat list used by game logic — category index + puzzle index */
+let ALL_PUZZLES = [];
+CATEGORIES.forEach((cat, ci) => {
+  cat.puzzles.forEach((p, pi) => {
+    ALL_PUZZLES.push({ ...p, _catIdx: ci, _idx: ALL_PUZZLES.length });
+  });
+});
 
 const COLS   = 3;
 const ROWS   = 3;
 const TOTAL  = COLS * ROWS;
-const SNAP   = 34; // px snap radius
+const SNAP   = 34;
 
 /* ============================================================
-   SEEDED PRNG  (LCG)
+   SEEDED PRNG
 ============================================================ */
 function makeRng(seed) {
   let s = (seed >>> 0) || 1;
@@ -440,16 +525,13 @@ function makeRng(seed) {
 }
 
 /* ============================================================
-   GENERATE TAB DIRECTIONS
-   tabs[row][col] = { top, right, bottom, left }
-   +1 = outward tab, -1 = inward blank, 0 = straight edge
+   TABS
 ============================================================ */
 function generateTabs(seed) {
   const rng  = makeRng(seed);
   const tabs = Array.from({ length: ROWS }, () =>
     Array.from({ length: COLS }, () => ({}))
   );
-
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       tabs[r][c].top    = r === 0        ? 0 : -tabs[r - 1][c].bottom;
@@ -462,90 +544,45 @@ function generateTabs(seed) {
 }
 
 /* ============================================================
-   BEZIER PATH HELPERS
-   hTab: horizontal side  (x1,y) → (x2,y),  tab bump by dy
-   vTab: vertical side    (x,y1) → (x,y2),  tab bump by dx
+   BEZIER HELPERS
 ============================================================ */
 function hTab(ctx, x1, x2, y, dy) {
   if (!dy) { ctx.lineTo(x2, y); return; }
-  const w   = Math.abs(x2 - x1);
-  const dir = x2 > x1 ? 1 : -1;
-  const mx  = (x1 + x2) * 0.5;
+  const w = Math.abs(x2 - x1), dir = x2 > x1 ? 1 : -1, mx = (x1 + x2) * 0.5;
   ctx.lineTo(x1 + dir * w * 0.35, y);
-  ctx.bezierCurveTo(
-    x1 + dir * w * 0.35, y + dy * 0.5,
-    mx  - dir * w * 0.10, y + dy,
-    mx, y + dy
-  );
-  ctx.bezierCurveTo(
-    mx  + dir * w * 0.10, y + dy,
-    x1 + dir * w * 0.65, y + dy * 0.5,
-    x1 + dir * w * 0.65, y
-  );
+  ctx.bezierCurveTo(x1+dir*w*0.35,y+dy*0.5, mx-dir*w*0.10,y+dy, mx,y+dy);
+  ctx.bezierCurveTo(mx+dir*w*0.10,y+dy, x1+dir*w*0.65,y+dy*0.5, x1+dir*w*0.65,y);
   ctx.lineTo(x2, y);
 }
-
 function vTab(ctx, x, y1, y2, dx) {
   if (!dx) { ctx.lineTo(x, y2); return; }
-  const h   = Math.abs(y2 - y1);
-  const dir = y2 > y1 ? 1 : -1;
-  const my  = (y1 + y2) * 0.5;
+  const h = Math.abs(y2 - y1), dir = y2 > y1 ? 1 : -1, my = (y1 + y2) * 0.5;
   ctx.lineTo(x, y1 + dir * h * 0.35);
-  ctx.bezierCurveTo(
-    x + dx * 0.5, y1 + dir * h * 0.35,
-    x + dx, my  - dir * h * 0.10,
-    x + dx, my
-  );
-  ctx.bezierCurveTo(
-    x + dx, my  + dir * h * 0.10,
-    x + dx * 0.5, y1 + dir * h * 0.65,
-    x, y1 + dir * h * 0.65
-  );
+  ctx.bezierCurveTo(x+dx*0.5,y1+dir*h*0.35, x+dx,my-dir*h*0.10, x+dx,my);
+  ctx.bezierCurveTo(x+dx,my+dir*h*0.10, x+dx*0.5,y1+dir*h*0.65, x,y1+dir*h*0.65);
   ctx.lineTo(x, y2);
 }
-
-/* Build the full closed path for one puzzle piece.
-   (px,py) = top-left of cell area within the piece canvas,
-   (cw,ch) = cell dimensions, t = tab protrusion */
 function buildPiecePath(ctx, px, py, cw, ch, tabs, t) {
   ctx.beginPath();
   ctx.moveTo(px, py);
-  // TOP    left→right  outward = UP   (negative y)
-  hTab(ctx, px,    px + cw, py,      tabs.top    ? -tabs.top    * t : 0);
-  // RIGHT  top→bottom  outward = RIGHT (positive x)
-  vTab(ctx, px+cw, py,    py + ch,   tabs.right  ?  tabs.right  * t : 0);
-  // BOTTOM right→left  outward = DOWN  (positive y)
-  hTab(ctx, px+cw, px,    py + ch,   tabs.bottom ?  tabs.bottom * t : 0);
-  // LEFT   bottom→top  outward = LEFT  (negative x)
-  vTab(ctx, px,    py+ch, py,        tabs.left   ? -tabs.left   * t : 0);
+  hTab(ctx, px,    px+cw, py,    tabs.top    ? -tabs.top    * t : 0);
+  vTab(ctx, px+cw, py,    py+ch, tabs.right  ?  tabs.right  * t : 0);
+  hTab(ctx, px+cw, px,    py+ch, tabs.bottom ?  tabs.bottom * t : 0);
+  vTab(ctx, px,    py+ch, py,    tabs.left   ? -tabs.left   * t : 0);
   ctx.closePath();
 }
-
-/* ============================================================
-   CREATE PIECE CANVAS
-   Returns a <canvas> element showing the clipped image fragment.
-============================================================ */
 function createPieceCanvas(img, col, row, cw, ch, tabSz, tabs) {
-  const PAD = tabSz;                         // padding = tabSize
+  const PAD = tabSz;
   const pw  = Math.ceil(cw + PAD * 2);
   const ph  = Math.ceil(ch + PAD * 2);
   const canvas = document.createElement('canvas');
-  canvas.width  = pw;
-  canvas.height = ph;
+  canvas.width = pw; canvas.height = ph;
   const ctx = canvas.getContext('2d');
-
-  const px = PAD, py = PAD;                  // cell origin inside canvas
-  const t  = tabSz * 0.88;                   // actual protrusion (slightly less than padding)
-
-  // 1. Build + apply clip
-  buildPiecePath(ctx, px, py, cw, ch, tabs, t);
-  ctx.save();
-  ctx.clip();
-
-  // 2. Draw the full image so that the relevant cell aligns with (px, py)
-  ctx.drawImage(img, -col * cw + PAD, -row * ch + PAD, cw * COLS, ch * ROWS);
+  const t = tabSz * 0.88;
+  buildPiecePath(ctx, PAD, PAD, cw, ch, tabs, t);
+  ctx.save(); ctx.clip();
+  ctx.drawImage(img, -col*cw+PAD, -row*ch+PAD, cw*COLS, ch*ROWS);
   ctx.restore();
-
   return canvas;
 }
 
@@ -553,21 +590,22 @@ function createPieceCanvas(img, col, row, cw, ch, tabSz, tabs) {
    GAME STATE
 ============================================================ */
 const state = {
-  puzzleIdx: 0,
-  pieces:     [],     // [{el, canvas, col, row, x, y, placed}]
-  placed:     0,
-  tabSz:      0,
-  cellW:      0,
-  cellH:      0,
-  boardRect:  null,  // {left,top,width,height} relative to #game-area
+  puzzleIdx: 0,    // index into ALL_PUZZLES
+  pieces:    [],
+  placed:    0,
+  tabSz:     0,
+  cellW:     0,
+  cellH:     0,
+  boardRect: null,
 };
-
-let activeDrag = null; // {piece, offX, offY, gaRect}
+let activeDrag = null;
 
 /* ============================================================
-   SCREEN NAVIGATION
+   NAVIGATION
 ============================================================ */
-function showMenu() {
+function showCategories() {
+  document.getElementById('categories-view').style.display = 'flex';
+  document.getElementById('gallery-view').classList.remove('active');
   document.getElementById('menu-screen').classList.add('active');
   document.getElementById('game-screen').classList.remove('active');
   stopConfetti();
@@ -575,42 +613,85 @@ function showMenu() {
   clearGameArea();
 }
 
+function showGallery(catIdx) {
+  buildGallery(catIdx);
+  document.getElementById('categories-view').style.display = 'none';
+  document.getElementById('gallery-view').classList.add('active');
+}
+
+function showMenu() {
+  showCategories();
+}
+
 function clearGameArea() {
   document.querySelectorAll('.puzzle-piece').forEach(e => e.remove());
   document.getElementById('puzzle-board').querySelectorAll('.board-slot').forEach(e => e.remove());
-  state.pieces  = [];
-  state.placed  = 0;
-  activeDrag    = null;
+  state.pieces = [];
+  state.placed = 0;
+  activeDrag   = null;
 }
 
 /* ============================================================
-   GALLERY
+   BUILD CATEGORIES (fan cards)
 ============================================================ */
-function initGallery() {
-  const gallery = document.getElementById('puzzle-gallery');
-  PUZZLES.forEach((p, i) => {
-    const card = document.createElement('div');
-    card.className = 'puzzle-card';
-    card.innerHTML = `
-      <img src="${p.url}" loading="lazy" alt="${p.name}">
+function initCategories() {
+  const view = document.getElementById('categories-view');
+  view.innerHTML = '';
 
-    `;
-    
+  CATEGORIES.forEach((cat, ci) => {
+    const card = document.createElement('div');
+    card.className = 'cat-card';
+
+    // Show first 3 puzzle images as the fan
+    const previewCount = Math.min(3, cat.puzzles.length);
+    for (let i = 0; i < previewCount; i++) {
+      const img = document.createElement('img');
+      img.className = 'fan-img';
+      img.src     = cat.puzzles[i].url;
+      img.loading = 'lazy';
+      img.alt     = '';
+      card.appendChild(img);
+    }
+
     let startX = 0, startY = 0;
-    
-    card.addEventListener('pointerdown', e => {
-      startX = e.clientX;
-      startY = e.clientY;
-    });
-    
-    card.addEventListener('pointerup', e => {
-      const dx = Math.abs(e.clientX - startX);
-      const dy = Math.abs(e.clientY - startY);
-      if (dx < 10 && dy < 10) {
-        startGame(i);
+    card.addEventListener('pointerdown', e => { startX = e.clientX; startY = e.clientY; });
+    card.addEventListener('pointerup',   e => {
+      if (Math.abs(e.clientX - startX) < 10 && Math.abs(e.clientY - startY) < 10) {
+        showGallery(ci);
       }
     });
-    
+
+    view.appendChild(card);
+  });
+}
+
+/* ============================================================
+   BUILD GALLERY (puzzle cards within a category)
+============================================================ */
+function buildGallery(catIdx) {
+  const gallery = document.getElementById('puzzle-gallery');
+  gallery.innerHTML = '';
+
+  const cat = CATEGORIES[catIdx];
+  cat.puzzles.forEach((p, pi) => {
+    const globalIdx = ALL_PUZZLES.findIndex(x => x._catIdx === catIdx && x.url === p.url);
+
+    const card = document.createElement('div');
+    card.className = 'puzzle-card';
+    const img = document.createElement('img');
+    img.src     = p.url;
+    img.loading = 'lazy';
+    img.alt     = p.name;
+    card.appendChild(img);
+
+    let startX = 0, startY = 0;
+    card.addEventListener('pointerdown', e => { startX = e.clientX; startY = e.clientY; });
+    card.addEventListener('pointerup',   e => {
+      if (Math.abs(e.clientX - startX) < 10 && Math.abs(e.clientY - startY) < 10) {
+        startGame(globalIdx);
+      }
+    });
+
     gallery.appendChild(card);
   });
 }
@@ -624,30 +705,27 @@ function startGame(idx) {
 
   document.getElementById('menu-screen').classList.remove('active');
   document.getElementById('game-screen').classList.add('active');
-
-
   updateProgress(0);
 
-  // Show loading
   const loadOverlay = document.getElementById('loading-overlay');
   loadOverlay.classList.add('show');
 
+  const puzzle = ALL_PUZZLES[idx];
   const img = new Image();
-  img.onload  = () => { loadOverlay.classList.remove('show'); buildPuzzle(img); };
-  img.onerror = () => { loadOverlay.classList.remove('show'); alert('Не удалось загрузить картинку. Проверь интернет-соединение.'); };
-  img.src = PUZZLES[idx].url;
+  img.onload  = () => { loadOverlay.classList.remove('show'); buildPuzzle(img, puzzle); };
+  img.onerror = () => { loadOverlay.classList.remove('show'); alert('Не удалось загрузить картинку.'); };
+  img.src = puzzle.url;
 }
 
 /* ============================================================
    BUILD PUZZLE
 ============================================================ */
-function buildPuzzle(img) {
-  const boardArea   = document.getElementById('board-area');
-  const gameArea    = document.getElementById('game-area');
-  const board       = document.getElementById('puzzle-board');
-  const ghostImg    = document.getElementById('ghost-img');
+function buildPuzzle(img, puzzle) {
+  const boardArea = document.getElementById('board-area');
+  const gameArea  = document.getElementById('game-area');
+  const board     = document.getElementById('puzzle-board');
+  const ghostImg  = document.getElementById('ghost-img');
 
-  // ---- Calculate board size ---------------------------------
   const areaW = boardArea.clientWidth  - 28;
   const areaH = boardArea.clientHeight - 28;
   const size  = Math.min(areaW, areaH, 500);
@@ -663,215 +741,150 @@ function buildPuzzle(img) {
   state.cellH = ch;
   state.tabSz = tsz;
 
-  // ---- Ghost image ------------------------------------------
-  ghostImg.src = PUZZLES[state.puzzleIdx].url;
+  ghostImg.src = puzzle.url;
 
-  // ---- Slots ------------------------------------------------
   board.querySelectorAll('.board-slot').forEach(e => e.remove());
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const slot = document.createElement('div');
-      slot.className  = 'board-slot';
-      slot.id         = `slot-${r}-${c}`;
-      slot.style.left = (c * cw) + 'px';
-      slot.style.top  = (r * ch) + 'px';
+      slot.className = 'board-slot';
+      slot.id        = `slot-${r}-${c}`;
+      slot.style.left   = (c * cw) + 'px';
+      slot.style.top    = (r * ch) + 'px';
       slot.style.width  = cw + 'px';
       slot.style.height = ch + 'px';
       board.appendChild(slot);
     }
   }
 
-  // ---- Generate tabs ----------------------------------------
-  const tabs = generateTabs(PUZZLES[state.puzzleIdx].seed);
-  const rng  = makeRng(PUZZLES[state.puzzleIdx].seed + 9999);
+  const tabs = generateTabs(puzzle.seed);
+  const rng  = makeRng(puzzle.seed + 9999);
 
-  // ---- Wait for layout, then measure & spawn pieces ---------
   requestAnimationFrame(() => {
     const gaRect = gameArea.getBoundingClientRect();
     const bRect  = board.getBoundingClientRect();
 
     state.boardRect = {
-      left:   bRect.left   - gaRect.left,
-      top:    bRect.top    - gaRect.top,
+      left:   bRect.left  - gaRect.left,
+      top:    bRect.top   - gaRect.top,
       width:  size,
       height: size,
     };
 
-    // Build and scatter pieces randomly in game area (not touching board)
     const pieceW = Math.ceil(cw + tsz * 2);
     const pieceH = Math.ceil(ch + tsz * 2);
-
-    const gaW = gaRect.width;
-    const gaH = gaRect.height;
+    const gaW = gaRect.width, gaH = gaRect.height;
     const boardX = bRect.left - gaRect.left;
-    const boardY = bRect.top - gaRect.top;
-    const margin = 10;
-    const boardBuffer = 20;
+    const boardY = bRect.top  - gaRect.top;
+    const margin = 10, boardBuffer = 20;
 
-    // Calculate safe zones (areas not overlapping with board)
     const safeZones = [
-      // Left of board
-      { x: margin, y: margin, w: boardX - pieceW - margin * 2 - boardBuffer, h: gaH - margin * 2 },
-      // Right of board  
-      { x: boardX + size + margin + boardBuffer, y: margin, w: gaW - boardX - size - margin * 2 - boardBuffer, h: gaH - margin * 2 },
-      // Above board
-      { x: margin, y: margin, w: gaW - margin * 2, h: boardY - pieceH - margin * 2 - boardBuffer },
-      // Below board
-      { x: margin, y: boardY + size + margin + boardBuffer, w: gaW - margin * 2, h: gaH - boardY - size - margin * 2 - boardBuffer },
+      { x: margin, y: margin, w: boardX - pieceW - margin*2 - boardBuffer, h: gaH - margin*2 },
+      { x: boardX + size + margin + boardBuffer, y: margin, w: gaW - boardX - size - margin*2 - boardBuffer, h: gaH - margin*2 },
+      { x: margin, y: margin, w: gaW - margin*2, h: boardY - pieceH - margin*2 - boardBuffer },
+      { x: margin, y: boardY + size + margin + boardBuffer, w: gaW - margin*2, h: gaH - boardY - size - margin*2 - boardBuffer },
     ].filter(z => z.w > pieceW && z.h > pieceH);
 
-    // Generate random positions in safe zones
     const positions = [];
-    const overflow = 30;
     for (let i = 0; i < TOTAL; i++) {
       const zone = safeZones[Math.floor(rng() * safeZones.length)];
-      const x = zone.x + rng() * Math.max(0, zone.w - pieceW);
-      const y = zone.y + rng() * Math.max(0, zone.h - pieceH);
-      positions.push({ x, y });
+      positions.push({
+        x: zone.x + rng() * Math.max(0, zone.w - pieceW),
+        y: zone.y + rng() * Math.max(0, zone.h - pieceH),
+      });
     }
 
-    // Shuffle order for pieces
     const order = Array.from({ length: TOTAL }, (_, i) => i).sort(() => rng() - 0.5);
 
     order.forEach((idx, i) => {
       const col = idx % COLS;
       const row = Math.floor(idx / COLS);
-
-      const pc = createPieceCanvas(img, col, row, cw, ch, tsz, tabs[row][col]);
+      const pc  = createPieceCanvas(img, col, row, cw, ch, tsz, tabs[row][col]);
 
       const el = document.createElement('div');
       el.className = 'puzzle-piece';
       el.appendChild(pc);
-      el.style.width  = pieceW + 'px';
-      el.style.height = pieceH + 'px';
+      el.style.width   = pieceW + 'px';
+      el.style.height  = pieceH + 'px';
+      el.style.left    = positions[i].x + 'px';
+      el.style.top     = positions[i].y + 'px';
+      el.style.zIndex  = 20 + i;
 
-      const pos = positions[i];
-      
-      const sx = pos.x;
-      const sy = pos.y;
-
-      el.style.left      = sx + 'px';
-      el.style.top       = sy + 'px';
-      el.style.zIndex    = 20 + i;
-
-      const piece = { el, col, row, x: sx, y: sy, placed: false };
+      const piece = { el, col, row, x: positions[i].x, y: positions[i].y, placed: false };
       state.pieces.push(piece);
       gameArea.appendChild(el);
-
       el.addEventListener('pointerdown', e => onDown(e, piece));
     });
   });
 }
 
 /* ============================================================
-   DRAG  –  POINTER DOWN
+   DRAG
 ============================================================ */
 function onDown(e, piece) {
   if (piece.placed) return;
-  e.preventDefault();
-  e.stopPropagation();
-
+  e.preventDefault(); e.stopPropagation();
   const el     = piece.el;
   const gaRect = document.getElementById('game-area').getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
-
-  const offX = e.clientX - elRect.left;
-  const offY = e.clientY - elRect.top;
-
   el.setPointerCapture(e.pointerId);
   el.classList.add('dragging');
-  el.style.zIndex    = 1000;
-
-  activeDrag = { piece, offX, offY, gaRect };
-
+  el.style.zIndex = 1000;
+  activeDrag = { piece, offX: e.clientX - elRect.left, offY: e.clientY - elRect.top, gaRect };
   el.addEventListener('pointermove', onMove);
   el.addEventListener('pointerup',   onUp);
   el.addEventListener('pointercancel', onUp);
 }
-
-/* ============================================================
-   DRAG  –  POINTER MOVE
-============================================================ */
 function onMove(e) {
   if (!activeDrag) return;
   e.preventDefault();
-
   const { piece, offX, offY, gaRect } = activeDrag;
   const el = piece.el;
   const overflow = 40;
-
-  const x = Math.max(-overflow, Math.min(e.clientX - gaRect.left - offX, gaRect.width - el.offsetWidth + overflow));
-  const y = Math.max(-overflow, Math.min(e.clientY - gaRect.top - offY, gaRect.height - el.offsetHeight + overflow));
-
-  piece.x = x;
-  piece.y = y;
-  el.style.left = x + 'px';
-  el.style.top  = y + 'px';
+  const x = Math.max(-overflow, Math.min(e.clientX - gaRect.left - offX, gaRect.width  - el.offsetWidth  + overflow));
+  const y = Math.max(-overflow, Math.min(e.clientY - gaRect.top  - offY, gaRect.height - el.offsetHeight + overflow));
+  piece.x = x; piece.y = y;
+  el.style.left = x + 'px'; el.style.top = y + 'px';
 }
-
-/* ============================================================
-   DRAG  –  POINTER UP
-============================================================ */
 function onUp(e) {
   if (!activeDrag) return;
   e.preventDefault();
-
   const { piece } = activeDrag;
   const el = piece.el;
-
   el.classList.remove('dragging');
   el.releasePointerCapture(e.pointerId);
   el.removeEventListener('pointermove', onMove);
   el.removeEventListener('pointerup',   onUp);
   el.removeEventListener('pointercancel', onUp);
-
   activeDrag = null;
-
   el.style.transform = 'rotate(0deg) scale(1)';
   checkSnap(piece);
 }
 
 /* ============================================================
-   SNAP LOGIC
+   SNAP
 ============================================================ */
 function checkSnap(piece) {
   if (piece.placed) return;
-
   const { boardRect, cellW, cellH, tabSz } = state;
-
-  // Target = top-left of piece canvas when perfectly placed
   const tx = boardRect.left + piece.col * cellW - tabSz;
   const ty = boardRect.top  + piece.row * cellH - tabSz;
-
-  const dx = Math.abs(piece.x - tx);
-  const dy = Math.abs(piece.y - ty);
-
-  if (dx < SNAP && dy < SNAP) {
-    // ---- SNAP! ------------------------------------------------
+  if (Math.abs(piece.x - tx) < SNAP && Math.abs(piece.y - ty) < SNAP) {
     piece.placed = true;
     state.placed++;
-
     const el = piece.el;
     el.classList.add('snapping', 'placed');
-    el.style.left      = tx + 'px';
-    el.style.top       = ty + 'px';
-    el.style.zIndex    = 5;
-
-
-    // Mark slot filled
+    el.style.left   = tx + 'px';
+    el.style.top    = ty + 'px';
+    el.style.zIndex = 5;
     const slot = document.getElementById(`slot-${piece.row}-${piece.col}`);
     if (slot) slot.classList.add('filled');
-
-    // Cleanup transition class
     el.addEventListener('transitionend', () => el.classList.remove('snapping'), { once: true });
-
     playSnapSound();
     spawnStars(el);
     updateProgress(state.placed);
-
     if (state.placed === TOTAL) setTimeout(onWin, 350);
   } else {
-    // Return small bounce
     piece.el.style.transition = 'transform .15s';
     piece.el.style.transform  = 'rotate(0deg) scale(1)';
     setTimeout(() => { piece.el.style.transition = ''; }, 200);
@@ -887,29 +900,21 @@ function onWin() {
   document.getElementById('win-overlay').classList.add('show');
 }
 
-/* ============================================================
-   PROGRESS
-============================================================ */
 function updateProgress(n) {
   document.getElementById('progress-label').textContent = `${n} / ${TOTAL}`;
   document.getElementById('progress-bar-fill').style.width = (n / TOTAL * 100) + '%';
 }
 
-/* ============================================================
-   STARS
-============================================================ */
 function spawnStars(el) {
   const rect = el.getBoundingClientRect();
-  const cx   = rect.left + rect.width  * 0.5;
-  const cy   = rect.top  + rect.height * 0.5;
-  const emojis = ['⭐', '✨', '🌟', '💫'];
-
-  emojis.forEach((em, i) => {
+  const cx = rect.left + rect.width * 0.5;
+  const cy = rect.top  + rect.height * 0.5;
+  ['⭐','✨','🌟','💫'].forEach((em, i) => {
     const s = document.createElement('div');
     s.className = 'star-burst';
     s.textContent = em;
-    s.style.left  = (cx - 11 + (i - 1.5) * 22) + 'px';
-    s.style.top   = (cy - 11) + 'px';
+    s.style.left = (cx - 11 + (i - 1.5) * 22) + 'px';
+    s.style.top  = (cy - 11) + 'px';
     s.style.animationDelay = (i * 0.06) + 's';
     document.body.appendChild(s);
     setTimeout(() => s.remove(), 700);
@@ -917,40 +922,34 @@ function spawnStars(el) {
 }
 
 /* ============================================================
-   AUDIO  (Web Audio API – no external files)
+   AUDIO
 ============================================================ */
 let _audioCtx = null;
 function audioCtx() {
   if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   return _audioCtx;
 }
-
 function playSnapSound() {
   try {
     const ac = audioCtx();
     if (ac.state === 'suspended') ac.resume();
-    const osc  = ac.createOscillator();
-    const gain = ac.createGain();
+    const osc = ac.createOscillator(), gain = ac.createGain();
     osc.connect(gain); gain.connect(ac.destination);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(520, ac.currentTime);
     osc.frequency.exponentialRampToValueAtTime(880, ac.currentTime + 0.07);
     gain.gain.setValueAtTime(0.22, ac.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.14);
-    osc.start(ac.currentTime);
-    osc.stop(ac.currentTime + 0.14);
+    osc.start(ac.currentTime); osc.stop(ac.currentTime + 0.14);
   } catch (_) {}
 }
-
 function playSuccessSound() {
-  // Ascending arpeggio  C5 – E5 – G5 – C6
   const freqs = [523.25, 659.25, 783.99, 1046.50];
   try {
     const ac = audioCtx();
     if (ac.state === 'suspended') ac.resume();
     freqs.forEach((f, i) => {
-      const osc  = ac.createOscillator();
-      const gain = ac.createGain();
+      const osc = ac.createOscillator(), gain = ac.createGain();
       osc.connect(gain); gain.connect(ac.destination);
       osc.type = 'sine';
       const t = ac.currentTime + i * 0.14;
@@ -967,63 +966,39 @@ function playSuccessSound() {
    CONFETTI
 ============================================================ */
 const CONF_COLORS = ['#FF6B35','#4ECDC4','#FFE66D','#FF4081','#69F0AE','#448AFF','#E040FB'];
-let confRAF = null;
-let confParts = [];
-
+let confRAF = null, confParts = [];
 function startConfetti() {
   const canvas = document.getElementById('confetti-canvas');
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
   const ctx = canvas.getContext('2d');
-
   confParts = [];
-  for (let i = 0; i < 140; i++) {
-    confParts.push({
-      x:    Math.random() * canvas.width,
-      y:    -10 - Math.random() * 200,
-      vx:   (Math.random() - 0.5) * 5,
-      vy:   1.5 + Math.random() * 4,
-      sz:   5 + Math.random() * 9,
-      rot:  Math.random() * Math.PI * 2,
-      rs:   (Math.random() - 0.5) * 0.25,
-      col:  CONF_COLORS[Math.floor(Math.random() * CONF_COLORS.length)],
-      rect: Math.random() > 0.45,
-    });
-  }
-
+  for (let i = 0; i < 140; i++) confParts.push({
+    x: Math.random() * canvas.width, y: -10 - Math.random() * 200,
+    vx: (Math.random() - 0.5) * 5, vy: 1.5 + Math.random() * 4,
+    sz: 5 + Math.random() * 9, rot: Math.random() * Math.PI * 2,
+    rs: (Math.random() - 0.5) * 0.25,
+    col: CONF_COLORS[Math.floor(Math.random() * CONF_COLORS.length)],
+    rect: Math.random() > 0.45,
+  });
   if (confRAF) cancelAnimationFrame(confRAF);
-
   const frame = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     confParts.forEach(p => {
-      p.x   += p.vx;
-      p.y   += p.vy;
-      p.vy  += 0.06;
-      p.vx  += (Math.random() - 0.5) * 0.1;
-      p.rot += p.rs;
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
+      p.x += p.vx; p.y += p.vy; p.vy += 0.06;
+      p.vx += (Math.random() - 0.5) * 0.1; p.rot += p.rs;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
       ctx.fillStyle = p.col;
-      if (p.rect) ctx.fillRect(-p.sz * 0.5, -p.sz * 0.25, p.sz, p.sz * 0.5);
-      else {
-        ctx.beginPath();
-        ctx.arc(0, 0, p.sz * 0.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      if (p.rect) ctx.fillRect(-p.sz*.5, -p.sz*.25, p.sz, p.sz*.5);
+      else { ctx.beginPath(); ctx.arc(0,0,p.sz*.5,0,Math.PI*2); ctx.fill(); }
       ctx.restore();
     });
-
     confParts = confParts.filter(p => p.y < canvas.height + 60);
     if (confParts.length) confRAF = requestAnimationFrame(frame);
     else ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
-
   confRAF = requestAnimationFrame(frame);
   setTimeout(stopConfetti, 5500);
 }
-
 function stopConfetti() {
   if (confRAF) { cancelAnimationFrame(confRAF); confRAF = null; }
   confParts = [];
@@ -1034,7 +1009,18 @@ function stopConfetti() {
 /* ============================================================
    BUTTON WIRING
 ============================================================ */
-document.getElementById('back-btn').addEventListener('click', showMenu);
+document.getElementById('back-btn').addEventListener('click', () => {
+  document.getElementById('game-screen').classList.remove('active');
+  // Return to gallery view (same category), not categories
+  document.getElementById('menu-screen').classList.add('active');
+  document.getElementById('categories-view').style.display = 'none';
+  document.getElementById('gallery-view').classList.add('active');
+  stopConfetti();
+  document.getElementById('win-overlay').classList.remove('show');
+  clearGameArea();
+});
+
+document.getElementById('gallery-back-btn').addEventListener('click', showCategories);
 
 document.getElementById('btn-again').addEventListener('click', () => {
   document.getElementById('win-overlay').classList.remove('show');
@@ -1052,15 +1038,12 @@ document.getElementById('btn-menu').addEventListener('click', () => {
    INIT
 ============================================================ */
 document.addEventListener('contextmenu', e => e.preventDefault());
-initGallery();
+initCategories();
 
 if ('screen' in window && 'orientation' in screen) {
   screen.orientation.lock('landscape').catch(() => {});
 }
 
-/* ============================================================
-   SERVICE WORKER
-============================================================ */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});
