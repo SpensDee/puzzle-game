@@ -36,7 +36,12 @@
       font-family: 'Nunito', sans-serif;
       touch-action: none;
       -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
+    body { pointer-events: none; }
+    body * { pointer-events: auto; }
 
     /* ============================================================
        SCREENS
@@ -134,13 +139,7 @@
       aspect-ratio: 1/1;
       object-fit: cover; display: block;
     }
-    .puzzle-card-name {
-      padding: 8px 10px;
-      font-size: 14px; font-weight: 800;
-      color: var(--dark); text-align: center;
-      flex-shrink: 0;
-      background: white;
-    }
+
 
     /* ============================================================
        GAME SCREEN
@@ -174,12 +173,6 @@
       flex-shrink: 0;
     }
     #back-btn:active { transform: scale(.93); box-shadow: none; }
-
-    #puzzle-title-header {
-      font-size: clamp(14px, 2.5vw, 20px);
-      font-weight: 900; color: var(--dark);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
 
     #progress-wrap {
       margin-left: auto;
@@ -406,7 +399,7 @@
 <div id="game-screen" class="screen">
   <div id="game-header">
     <button id="back-btn">← Назад</button>
-    <span id="puzzle-title-header"></span>
+
     <div id="progress-wrap">
       <span id="progress-label">0 / 9</span>
       <div id="progress-bar-track">
@@ -640,7 +633,7 @@ function initGallery() {
     card.className = 'puzzle-card';
     card.innerHTML = `
       <img src="${p.url}" loading="lazy" alt="${p.name}">
-      <div class="puzzle-card-name">${p.name}</div>
+
     `;
     card.addEventListener('pointerdown', () => startGame(i));
     gallery.appendChild(card);
@@ -656,7 +649,7 @@ function startGame(idx) {
 
   document.getElementById('menu-screen').classList.remove('active');
   document.getElementById('game-screen').classList.add('active');
-  document.getElementById('puzzle-title-header').textContent = PUZZLES[idx].name;
+
 
   updateProgress(0);
 
@@ -1081,6 +1074,7 @@ document.getElementById('btn-menu').addEventListener('click', () => {
 /* ============================================================
    INIT
 ============================================================ */
+document.addEventListener('contextmenu', e => e.preventDefault());
 initGallery();
 
 /* ============================================================
