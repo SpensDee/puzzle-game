@@ -592,7 +592,22 @@ function initGallery() {
       <img src="${p.url}" loading="lazy" alt="${p.name}">
 
     `;
-    card.addEventListener('pointerdown', () => startGame(i));
+    
+    let startX = 0, startY = 0;
+    
+    card.addEventListener('pointerdown', e => {
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+    
+    card.addEventListener('pointerup', e => {
+      const dx = Math.abs(e.clientX - startX);
+      const dy = Math.abs(e.clientY - startY);
+      if (dx < 10 && dy < 10) {
+        startGame(i);
+      }
+    });
+    
     gallery.appendChild(card);
   });
 }
