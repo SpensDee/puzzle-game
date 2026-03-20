@@ -151,17 +151,11 @@
         var(--bg);
     }
 
-    /* --- Header --- */
-    #game-header {
-      height: var(--header-h);
-      display: flex;
-      align-items: center;
-      padding: 0 14px;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-
+     /* --- Fixed Header Elements --- */
     #back-btn {
+      position: fixed;
+      top: 10px;
+      left: 14px;
       display: flex; align-items: center; gap: 6px;
       background: var(--primary);
       color: white; border: none; border-radius: 12px;
@@ -170,14 +164,16 @@
       cursor: pointer;
       box-shadow: 0 3px 10px rgba(255,107,53,.4);
       transition: transform .15s, box-shadow .15s;
-      flex-shrink: 0;
+      z-index: 100;
     }
     #back-btn:active { transform: scale(.93); box-shadow: none; }
 
     #progress-wrap {
-      margin-left: auto;
+      position: fixed;
+      top: 10px;
+      right: 14px;
       display: flex; align-items: center; gap: 8px;
-      flex-shrink: 0;
+      z-index: 100;
     }
     #progress-label {
       font-size: 13px; font-weight: 800; color: var(--secondary);
@@ -300,30 +296,31 @@
        WIN OVERLAY
     ============================================================ */
     #win-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.55);
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: transparent;
       display: none; align-items: center; justify-content: center;
       z-index: 9998;
+      padding: 20px;
     }
     #win-overlay.show { display: flex; }
 
     #win-card {
       background: white;
       border-radius: 28px;
-      padding: 36px 52px;
+      padding: 24px 40px;
       text-align: center;
-      box-shadow: 0 24px 80px rgba(0,0,0,.3);
-      animation: popIn .45s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 -4px 30px rgba(0,0,0,.2);
+      animation: slideUp .45s cubic-bezier(.34,1.56,.64,1);
     }
-    @keyframes popIn {
-      from { transform: scale(.4) rotate(-6deg); opacity: 0; }
-      to   { transform: scale(1) rotate(0deg); opacity: 1; }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
     }
 
-    #win-card .win-emoji { font-size: 60px; display: block; margin-bottom: 6px; }
+    #win-card .win-emoji { font-size: 40px; display: block; margin-bottom: 4px; }
     #win-card h2 {
-      font-size: clamp(24px, 5vw, 40px); font-weight: 900;
-      color: var(--dark); margin-bottom: 22px;
+      font-size: clamp(18px, 4vw, 28px); font-weight: 900;
+      color: var(--dark); margin-bottom: 16px;
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
@@ -397,14 +394,12 @@
      GAME SCREEN
 ============================================================ -->
 <div id="game-screen" class="screen">
-  <div id="game-header">
-    <button id="back-btn">← Назад</button>
+  <button id="back-btn">← Назад</button>
 
-    <div id="progress-wrap">
-      <span id="progress-label">0 / 9</span>
-      <div id="progress-bar-track">
-        <div id="progress-bar-fill"></div>
-      </div>
+  <div id="progress-wrap">
+    <span id="progress-label">0 / 9</span>
+    <div id="progress-bar-track">
+      <div id="progress-bar-fill"></div>
     </div>
   </div>
 
