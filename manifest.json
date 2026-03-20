@@ -2,7 +2,7 @@
   "name": "Puzzle Fun! 🧩",
   "short_name": "Пазлы",
   "description": "Детская игра-пазл для самых маленьких",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#FFF9F0",
@@ -11,20 +11,9 @@
   "categories": ["games", "kids"],
   "icons": [
     {
-      "src": "assets/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/icon-512.png",
+      "src": "assets/icon.jpg",
       "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "type": "image/jpeg"
     }
   ]
 }
