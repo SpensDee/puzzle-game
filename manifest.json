@@ -8,10 +8,13 @@
   "background_color": "#FFF9F0",
   "theme_color": "#FF6B35",
   "lang": "ru",
-  "categories": ["games", "kids"],
+  "categories": [
+    "games",
+    "kids"
+  ],
   "icons": [
     {
-      "src": "assets/icon.jpg",
+      "src": "assets/icon.png",
       "sizes": "512x512",
       "type": "image/jpeg"
     }
